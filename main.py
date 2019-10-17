@@ -1,4 +1,4 @@
-import tkinter
+import tkinter as tk
 from tkinter.constants import *
 
 BOARD_SIZE = 200
@@ -6,37 +6,52 @@ SQUARE_SIZE = 10
 x0, y0 = 5, 5
 
 
-tk = tkinter.Tk()
-frame = tkinter.Frame(tk, relief=RAISED, borderwidth=2)
-frame.pack(fill=BOTH,expand=1)
+class SnakeApp(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.pack()
+        self.create_widgets()
+        self.init_game()
 
-label = tkinter.Label(frame, text="Snake on a Plane")
-label.pack(fill=X, expand=1)
+    def create_widgets(self):
+        self.label = tk.Label(self, text="Snake on a Plane")
+        self.label.pack(fill=X, expand=1)
 
-# create in memory grid
-grid = [[y for y in range(BOARD_SIZE)] for x in range(BOARD_SIZE)]
+        # draw grid
+        self.board = tk.Canvas(self, width=BOARD_SIZE+x0, height=BOARD_SIZE+y0)
+        self.board.create_rectangle(x0, y0, x0 + BOARD_SIZE, y0 + BOARD_SIZE)
 
-# for x, x_list in enumerate(grid):
-#     for y in x_list:
-#         print(x, y)
+        for i in range(0, BOARD_SIZE, SQUARE_SIZE):
+            self.board.create_line(x0 + i, y0, x0 + i, y0 + BOARD_SIZE)
+            self.board.create_line(x0, y0 + i, x0 + BOARD_SIZE, y0 + i)
 
-board = tkinter.Canvas(frame, width=BOARD_SIZE*1.2, height=BOARD_SIZE*1.2)
-board.create_rectangle(x0, y0, x0 + BOARD_SIZE, y0 + BOARD_SIZE)
+        self.board.pack()
 
-# draw grid
-for i in range(0, BOARD_SIZE, SQUARE_SIZE):
-    board.create_line(x0 + i, y0, x0 + i, y0 + BOARD_SIZE)
-    board.create_line(x0, y0 + i, x0 + BOARD_SIZE, y0 + i)
+        # test button
+        self.fill_button = tk.Button(self)
+        self.fill_button["text"] = "fill square"
+        self.fill_button["command"] = self.fill_square
+        self.fill_button.pack()
 
-board.pack(fill=BOTH, expand=1)
+        # exit button
+        self.quit = tk.Button(self, text="Close", fg="red",
+                              command=self.master.destroy)
+        self.quit.pack()
 
-board.create_polygon(
-    x0, y0,
-    x0 + SQUARE_SIZE, y0,
-    x0 + SQUARE_SIZE, y0 + SQUARE_SIZE,
-    x0, y0 + SQUARE_SIZE,
-    x0, y0)
+    def init_game(self):
+        # create in memory grid
+        # grid = [[y for y in range(BOARD_SIZE)] for x in range(BOARD_SIZE)]
+        pass
 
-button = tkinter.Button(frame, text="Exit", command=tk.destroy)
-button.pack(side=BOTTOM)
-tk.mainloop()
+    def fill_square(self):
+        self.board.create_polygon(
+            x0, y0,
+            x0 + SQUARE_SIZE, y0,
+            x0 + SQUARE_SIZE, y0 + SQUARE_SIZE,
+            x0, y0 + SQUARE_SIZE,
+            x0, y0)
+
+
+root = tk.Tk()
+app = SnakeApp(master=root)
+app.mainloop()
