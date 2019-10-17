@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter.constants import *
 
-BOARD_SIZE = 200 # pixels
-SQUARE_SIZE = 10 # pixels
+BOARD_SIZE = 200  # pixels
+SQUARE_SIZE = 10  # pixels
 x0, y0 = 5, 5
 GRID_SIZE = BOARD_SIZE // SQUARE_SIZE
 
@@ -38,7 +38,8 @@ class SnakeApp(tk.Frame):
         # self.grid_dict = dict(zip([x for x in range(BOARD_SIZE)], [dict(zip([y for y in range(BOARD_SIZE)], [0 for y in range(BOARD_SIZE)])) for]]))
         self.grid_dict = dict()
         for x in range(GRID_SIZE):
-            self.grid_dict[x] = dict(zip([y for y in range(GRID_SIZE)], [0]*GRID_SIZE))
+            self.grid_dict[x] = dict(
+                zip([y for y in range(GRID_SIZE)], [0]*GRID_SIZE))
 
         # bind controls
         self.master.bind("<Left>", self.move_left)
@@ -52,7 +53,8 @@ class SnakeApp(tk.Frame):
 
         # fill initial square
         self.head = [0, 0]
-        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
+        self.grid_dict[self.head[0]][self.head[1]
+                                     ] = self.fill_square(*self.head)
 
     def move_left(self, event):
         # delete current head on the UI
@@ -65,9 +67,10 @@ class SnakeApp(tk.Frame):
             self.head[0] = GRID_SIZE - 1
         else:
             self.head[0] -= 1
-        
+
         # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
+        self.grid_dict[self.head[0]][self.head[1]
+                                     ] = self.fill_square(*self.head)
 
     def move_right(self, event):
          # delete current head on the UI
@@ -75,28 +78,54 @@ class SnakeApp(tk.Frame):
         # erase current head in memory
         self.grid_dict[self.head[0]][self.head[1]] = 0
 
-        print(self.head)
         # update head position
         if self.head[0] == GRID_SIZE - 1:
             self.head[0] = 0
         else:
             self.head[0] += 1
-        
-        # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
 
+        # draw new head position
+        self.grid_dict[self.head[0]][self.head[1]
+                                     ] = self.fill_square(*self.head)
 
     def move_up(self, event):
-        print("UP")
+        # delete current head on the UI
+        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        # erase current head in memory
+        self.grid_dict[self.head[0]][self.head[1]] = 0
+
+        # update head position
+        if self.head[1] == 0:
+            self.head[1] = GRID_SIZE - 1
+        else:
+            self.head[1] -= 1
+
+        # draw new head position
+        self.grid_dict[self.head[0]][self.head[1]
+                                     ] = self.fill_square(*self.head)
 
     def move_down(self, event):
-        print("DOWN")
+        # delete current head on the UI
+        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        # erase current head in memory
+        self.grid_dict[self.head[0]][self.head[1]] = 0
+
+        # update head position
+        if self.head[1] == GRID_SIZE - 1:
+            self.head[1] = 0
+        else:
+            self.head[1] += 1
+
+        # draw new head position
+        self.grid_dict[self.head[0]][self.head[1]
+                                     ] = self.fill_square(*self.head)
 
     def fill_square(self, x, y):
         return self.board.create_polygon(
             x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE),
             x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 + (y * SQUARE_SIZE),
-            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 + (y * SQUARE_SIZE) + SQUARE_SIZE,
+            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 +
+            (y * SQUARE_SIZE) + SQUARE_SIZE,
             x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE) + SQUARE_SIZE,
             x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE))
 
