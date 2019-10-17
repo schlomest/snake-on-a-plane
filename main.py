@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter.constants import *
 
-BOARD_SIZE = 200
-SQUARE_SIZE = 10
+BOARD_SIZE = 200 # pixels
+SQUARE_SIZE = 10 # pixels
 x0, y0 = 5, 5
+GRID_SIZE = BOARD_SIZE // SQUARE_SIZE
 
 
 class SnakeApp(tk.Frame):
@@ -27,29 +28,80 @@ class SnakeApp(tk.Frame):
 
         self.board.pack()
 
-        # test button
-        self.fill_button = tk.Button(self)
-        self.fill_button["text"] = "fill square"
-        self.fill_button["command"] = self.fill_square
-        self.fill_button.pack()
-
         # exit button
         self.quit = tk.Button(self, text="Close", fg="red",
                               command=self.master.destroy)
         self.quit.pack()
 
     def init_game(self):
-        # create in memory grid
-        # grid = [[y for y in range(BOARD_SIZE)] for x in range(BOARD_SIZE)]
-        pass
+        # create in-memory grid
+        # self.grid_dict = dict(zip([x for x in range(BOARD_SIZE)], [dict(zip([y for y in range(BOARD_SIZE)], [0 for y in range(BOARD_SIZE)])) for]]))
+        self.grid_dict = dict()
+        for x in range(GRID_SIZE):
+            self.grid_dict[x] = dict(zip([y for y in range(GRID_SIZE)], [0]*GRID_SIZE))
 
-    def fill_square(self):
-        self.board.create_polygon(
-            x0, y0,
-            x0 + SQUARE_SIZE, y0,
-            x0 + SQUARE_SIZE, y0 + SQUARE_SIZE,
-            x0, y0 + SQUARE_SIZE,
-            x0, y0)
+        # bind controls
+        self.master.bind("<Left>", self.move_left)
+        self.master.bind("<a>", self.move_left)
+        self.master.bind("<Right>", self.move_right)
+        self.master.bind("<d>", self.move_right)
+        self.master.bind("<Up>", self.move_up)
+        self.master.bind("<w>", self.move_up)
+        self.master.bind("<Down>", self.move_down)
+        self.master.bind("<s>", self.move_down)
+
+        # fill initial square
+        self.head = [0, 0]
+        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
+
+    def move_left(self, event):
+        # delete current head on the UI
+        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        # erase current head in memory
+        self.grid_dict[self.head[0]][self.head[1]] = 0
+
+        # update head position
+        if self.head[0] == 0:
+            self.head[0] = GRID_SIZE - 1
+        else:
+            self.head[0] -= 1
+        
+        # draw new head position
+        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
+
+    def move_right(self, event):
+         # delete current head on the UI
+        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        # erase current head in memory
+        self.grid_dict[self.head[0]][self.head[1]] = 0
+
+        print(self.head)
+        # update head position
+        if self.head[0] == GRID_SIZE - 1:
+            self.head[0] = 0
+        else:
+            self.head[0] += 1
+        
+        # draw new head position
+        self.grid_dict[self.head[0]][self.head[1]] = self.fill_square(*self.head)
+
+
+    def move_up(self, event):
+        print("UP")
+
+    def move_down(self, event):
+        print("DOWN")
+
+    def fill_square(self, x, y):
+        return self.board.create_polygon(
+            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE),
+            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 + (y * SQUARE_SIZE),
+            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 + (y * SQUARE_SIZE) + SQUARE_SIZE,
+            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE) + SQUARE_SIZE,
+            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE))
+
+    def delete_square(self, square_id):
+        self.board.delete(square_id)
 
 
 root = tk.Tk()
