@@ -1,5 +1,10 @@
 import tkinter as tk
 from tkinter.constants import *
+from threading import Thread
+from time import sleep
+
+from snake_board import SnakeBoard
+# from snake import Snake
 
 BOARD_SIZE = 200  # pixels
 SQUARE_SIZE = 10  # pixels
@@ -18,47 +23,86 @@ class SnakeApp(tk.Frame):
         self.label = tk.Label(self, text="Snake on a Plane")
         self.label.pack(fill=X, expand=1)
 
-        # draw grid
-        self.board = tk.Canvas(self, width=BOARD_SIZE+x0, height=BOARD_SIZE+y0)
-        self.board.create_rectangle(x0, y0, x0 + BOARD_SIZE, y0 + BOARD_SIZE)
-
-        for i in range(0, BOARD_SIZE, SQUARE_SIZE):
-            self.board.create_line(x0 + i, y0, x0 + i, y0 + BOARD_SIZE)
-            self.board.create_line(x0, y0 + i, x0 + BOARD_SIZE, y0 + i)
-
-        self.board.pack()
+        # create game board
+        self.board = SnakeBoard(self)
 
         # exit button
         self.quit = tk.Button(self, text="Close", fg="red",
-                              command=self.master.destroy)
+                              command=self.kill_snake)
         self.quit.pack()
 
     def init_game(self):
         # create in-memory grid
-        # self.grid_dict = dict(zip([x for x in range(BOARD_SIZE)], [dict(zip([y for y in range(BOARD_SIZE)], [0 for y in range(BOARD_SIZE)])) for]]))
         self.grid_dict = dict()
         for x in range(GRID_SIZE):
             self.grid_dict[x] = dict(
                 zip([y for y in range(GRID_SIZE)], [0]*GRID_SIZE))
 
         # bind controls
-        self.master.bind("<Left>", self.move_left)
-        self.master.bind("<a>", self.move_left)
-        self.master.bind("<Right>", self.move_right)
-        self.master.bind("<d>", self.move_right)
-        self.master.bind("<Up>", self.move_up)
-        self.master.bind("<w>", self.move_up)
-        self.master.bind("<Down>", self.move_down)
-        self.master.bind("<s>", self.move_down)
+        self.master.bind("<Left>", self.turn_left)
+        self.master.bind("<a>", self.turn_left)
+        self.master.bind("<Right>", self.turn_right)
+        self.master.bind("<d>", self.turn_right)
+        self.master.bind("<Up>", self.turn_up)
+        self.master.bind("<w>", self.turn_up)
+        self.master.bind("<Down>", self.turn_down)
+        self.master.bind("<s>", self.turn_down)
+
+        # create snake
+        # self.snake = Snake()
 
         # fill initial square
         self.head = [0, 0]
         self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.fill_square(*self.head)
+                                     ] = self.board.fill_square(*self.head)
+        
+        # new grid update method
+        # self.update_grid(self.snake.head.x, self.snake.head.y)
 
-    def move_left(self, event):
+        # start snake thread for movement
+        self.active = True
+        self.direction = "RIGHT"
+        self.snake_thread = Thread(target=self.move_snake)
+        self.snake_thread.start()
+
+    def update_grid(self, x, y):
+        self.grid_dict[x, y] = self.board.fill_square(x ,y)
+
+    def move_snake(self):
+        while self.active:
+            if self.direction == "LEFT":
+                self.move_left()
+            elif self.direction == "RIGHT":
+                self.move_right()
+            elif self.direction == "UP":
+                self.move_up()
+            elif self.direction == "DOWN":
+                self.move_down()
+
+            sleep(.5)
+
+    def kill_snake(self):
+        self.active = False
+        self.snake_thread.join()
+        self.master.destroy()
+
+    def turn_left(self, event):
+        self.direction = "LEFT"
+
+    def turn_right(self, event):
+        self.direction = "RIGHT"
+
+    def turn_up(self, event):
+        # drink responsibly
+        self.direction = "UP"
+
+    def turn_down(self, event):
+        # for what?
+        self.direction = "DOWN"
+
+    def move_left(self):
         # delete current head on the UI
-        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
         # erase current head in memory
         self.grid_dict[self.head[0]][self.head[1]] = 0
 
@@ -70,11 +114,11 @@ class SnakeApp(tk.Frame):
 
         # draw new head position
         self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.fill_square(*self.head)
+                                     ] = self.board.fill_square(*self.head)
 
-    def move_right(self, event):
+    def move_right(self):
          # delete current head on the UI
-        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
         # erase current head in memory
         self.grid_dict[self.head[0]][self.head[1]] = 0
 
@@ -86,11 +130,11 @@ class SnakeApp(tk.Frame):
 
         # draw new head position
         self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.fill_square(*self.head)
+                                     ] = self.board.fill_square(*self.head)
 
-    def move_up(self, event):
+    def move_up(self):
         # delete current head on the UI
-        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
         # erase current head in memory
         self.grid_dict[self.head[0]][self.head[1]] = 0
 
@@ -102,11 +146,11 @@ class SnakeApp(tk.Frame):
 
         # draw new head position
         self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.fill_square(*self.head)
+                                     ] = self.board.fill_square(*self.head)
 
-    def move_down(self, event):
+    def move_down(self):
         # delete current head on the UI
-        self.delete_square(self.grid_dict[self.head[0]][self.head[1]])
+        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
         # erase current head in memory
         self.grid_dict[self.head[0]][self.head[1]] = 0
 
@@ -118,19 +162,7 @@ class SnakeApp(tk.Frame):
 
         # draw new head position
         self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.fill_square(*self.head)
-
-    def fill_square(self, x, y):
-        return self.board.create_polygon(
-            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE),
-            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 + (y * SQUARE_SIZE),
-            x0 + (x * SQUARE_SIZE) + SQUARE_SIZE, y0 +
-            (y * SQUARE_SIZE) + SQUARE_SIZE,
-            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE) + SQUARE_SIZE,
-            x0 + (x * SQUARE_SIZE), y0 + (y * SQUARE_SIZE))
-
-    def delete_square(self, square_id):
-        self.board.delete(square_id)
+                                     ] = self.board.fill_square(*self.head)
 
 
 root = tk.Tk()
