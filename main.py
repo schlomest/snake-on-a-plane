@@ -2,14 +2,10 @@ import tkinter as tk
 from tkinter.constants import *
 from threading import Thread
 from time import sleep
+from random import randrange
 
-from snake_board import SnakeBoard
-# from snake import Snake
-
-BOARD_SIZE = 200  # pixels
-SQUARE_SIZE = 10  # pixels
-x0, y0 = 5, 5
-GRID_SIZE = BOARD_SIZE // SQUARE_SIZE
+from snake_board import SnakeBoard, GRID_SIZE
+from snake import Snake
 
 
 class SnakeApp(tk.Frame):
@@ -32,11 +28,6 @@ class SnakeApp(tk.Frame):
         self.quit.pack()
 
     def init_game(self):
-        # create in-memory grid
-        self.grid_dict = dict()
-        for x in range(GRID_SIZE):
-            self.grid_dict[x] = dict(
-                zip([y for y in range(GRID_SIZE)], [0]*GRID_SIZE))
 
         # bind controls
         self.master.bind("<Left>", self.turn_left)
@@ -49,120 +40,51 @@ class SnakeApp(tk.Frame):
         self.master.bind("<s>", self.turn_down)
 
         # create snake
-        # self.snake = Snake()
+        self.snake = Snake(self.board)
 
-        # fill initial square
-        self.head = [0, 0]
-        self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.board.fill_square(*self.head)
-        
-        # new grid update method
-        # self.update_grid(self.snake.head.x, self.snake.head.y)
+        self.food = [randrange(GRID_SIZE), randrange(GRID_SIZE)]
+        self.add_food()
 
-        # start snake thread for movement
-        self.active = True
-        self.direction = "RIGHT"
+        # start snake movenment thread
         self.snake_thread = Thread(target=self.move_snake)
         self.snake_thread.start()
 
-    def update_grid(self, x, y):
-        self.grid_dict[x, y] = self.board.fill_square(x ,y)
-
     def move_snake(self):
-        while self.active:
-            if self.direction == "LEFT":
-                self.move_left()
-            elif self.direction == "RIGHT":
-                self.move_right()
-            elif self.direction == "UP":
-                self.move_up()
-            elif self.direction == "DOWN":
-                self.move_down()
-
+        while self.snake.alive:
+            self.snake.move()
             sleep(.5)
 
     def kill_snake(self):
-        self.active = False
+        self.snake.alive = False
         self.snake_thread.join()
         self.master.destroy()
 
     def turn_left(self, event):
-        self.direction = "LEFT"
+        if not self.snake.direction == "RIGHT":
+            self.snake.direction = "LEFT"
 
     def turn_right(self, event):
-        self.direction = "RIGHT"
+        if not self.snake.direction == "LEFT":
+            self.snake.direction = "RIGHT"
 
     def turn_up(self, event):
         # drink responsibly
-        self.direction = "UP"
+        if not self.snake.direction == "DOWN":
+            self.snake.direction = "UP"
 
     def turn_down(self, event):
         # for what?
-        self.direction = "DOWN"
+        if not self.snake.direction == "UP":
+            self.snake.direction = "DOWN"
 
-    def move_left(self):
-        # delete current head on the UI
-        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
-        # erase current head in memory
-        self.grid_dict[self.head[0]][self.head[1]] = 0
+    def add_food(self):
+        while self.food not in self.snake.body:
+            self.food = [randrange(GRID_SIZE), randrange(GRID_SIZE)]
+        
+        self.board.fill_square(self.food[0], self.food[1])
 
-        # update head position
-        if self.head[0] == 0:
-            self.head[0] = GRID_SIZE - 1
-        else:
-            self.head[0] -= 1
-
-        # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.board.fill_square(*self.head)
-
-    def move_right(self):
-         # delete current head on the UI
-        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
-        # erase current head in memory
-        self.grid_dict[self.head[0]][self.head[1]] = 0
-
-        # update head position
-        if self.head[0] == GRID_SIZE - 1:
-            self.head[0] = 0
-        else:
-            self.head[0] += 1
-
-        # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.board.fill_square(*self.head)
-
-    def move_up(self):
-        # delete current head on the UI
-        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
-        # erase current head in memory
-        self.grid_dict[self.head[0]][self.head[1]] = 0
-
-        # update head position
-        if self.head[1] == 0:
-            self.head[1] = GRID_SIZE - 1
-        else:
-            self.head[1] -= 1
-
-        # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.board.fill_square(*self.head)
-
-    def move_down(self):
-        # delete current head on the UI
-        self.board.delete_square(self.grid_dict[self.head[0]][self.head[1]])
-        # erase current head in memory
-        self.grid_dict[self.head[0]][self.head[1]] = 0
-
-        # update head position
-        if self.head[1] == GRID_SIZE - 1:
-            self.head[1] = 0
-        else:
-            self.head[1] += 1
-
-        # draw new head position
-        self.grid_dict[self.head[0]][self.head[1]
-                                     ] = self.board.fill_square(*self.head)
+    def eat_food(self):
+        pass
 
 
 root = tk.Tk()

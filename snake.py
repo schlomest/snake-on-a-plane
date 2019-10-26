@@ -1,22 +1,64 @@
 from time import sleep
 
+from snake_board import GRID_SIZE
 
-# the snake is a reverse linked-list. The head is the last node
-# in the linked list. The tail is the first
+
 class Snake():
-    def __init__(self):
+    def __init__(self, snake_board):
+        self.board = snake_board
         self.alive = True
-        self.head = self.SnakeNode(5, 5)
-        self.tail = self.SnakeNode(3, 5)
-        self.tail.next = self.SnakeNode(4, 5)
-        self.tail.next.next = self.head
+        self.body = [[5, 5], [4, 5], [3, 5]]
+        self.body_ui = [snake_board.fill_square(self.body[0][0], self.body[0][1]),
+                        snake_board.fill_square(self.body[1][0], self.body[1][1]),
+                        snake_board.fill_square(self.body[2][0], self.body[2][1])]
         self.direction = "RIGHT"
 
-    def add_section(self, x, y):
-        self.tail = self.SnakeNode(x, y)
+    def move(self):
+        self.body.pop()
 
-    class SnakeNode():
-        def __init__(self, x, y):
-            self.x = x
-            self.y = y
-            self.next = None
+        if self.direction == "RIGHT":
+            self.body.insert(0, [self.body[0][0] + 1, self.body[0][1]])
+        elif self.direction == "LEFT":
+            self.body.insert(0, [self.body[0][0] - 1, self.body[0][1]])
+        elif self.direction == "UP":
+            self.body.insert(0, [self.body[0][0], self.body[0][1] - 1])
+        elif self.direction == "DOWN":
+            self.body.insert(0, [self.body[0][0], self.body[0][1] + 1])
+
+        # make sure snake doesn't go off board
+        if self.body[0][0] == GRID_SIZE:
+            self.body[0][0] = 0
+        elif self.body[0][1] == GRID_SIZE:
+            self.body[0][1] = 0
+        elif self.body[0][0] == -1:
+            self.body[0][0] = GRID_SIZE - 1
+        elif self.body[0][1] == -1:
+            self.body[0][1] = GRID_SIZE - 1
+
+        # update UI
+        self.board.delete_square(self.body_ui.pop())
+        self.body_ui.insert(0, self.board.fill_square(self.body[0][0], self.body[0][1]))
+    
+    def grow(self):
+        if self.direction == "RIGHT":
+            self.body.insert(0, [self.body[0][0] + 1, self.body[0][1]])
+        elif self.direction == "LEFT":
+            self.body.insert(0, [self.body[0][0] - 1, self.body[0][1]])
+        elif self.direction == "UP":
+            self.body.insert(0, [self.body[0][0], self.body[0][1] - 1])
+        elif self.direction == "DOWN":
+            self.body.insert(0, [self.body[0][0], self.body[0][1] + 1])
+
+        # make sure snake doesn't go off board
+        if self.body[0][0] == GRID_SIZE:
+            self.body[0][0] = 0
+        elif self.body[0][1] == GRID_SIZE:
+            self.body[0][1] = 0
+        elif self.body[0][0] == -1:
+            self.body[0][0] = GRID_SIZE - 1
+        elif self.body[0][1] == -1:
+            self.body[0][1] = GRID_SIZE - 1
+
+        # update UI
+        self.body_ui.insert(0, self.board.fill_square(self.body[0][0], self.body[0][1]))
+    
