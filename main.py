@@ -1,11 +1,11 @@
 import tkinter as tk
-from tkinter.constants import *
+from random import randrange
 from threading import Thread
 from time import sleep
-from random import randrange
+from tkinter.constants import X
 
-from snake_board import SnakeBoard, GRID_SIZE
 from snake import Snake
+from snake_board import GRID_SIZE, SnakeBoard
 
 
 class SnakeApp(tk.Frame):
@@ -51,8 +51,13 @@ class SnakeApp(tk.Frame):
 
     def move_snake(self):
         while self.snake.alive:
-            self.snake.move()
-            sleep(.5)
+            if self.snake.body[0] == self.food:
+                self.snake.grow()
+                self.eat_food()
+                self.add_food()
+            else:
+                self.snake.move()
+            sleep(.2)
 
     def kill_snake(self):
         self.snake.alive = False
@@ -78,15 +83,18 @@ class SnakeApp(tk.Frame):
             self.snake.direction = "DOWN"
 
     def add_food(self):
-        while self.food not in self.snake.body:
+        while self.food in self.snake.body:
             self.food = [randrange(GRID_SIZE), randrange(GRID_SIZE)]
         
-        self.board.fill_square(self.food[0], self.food[1])
+        self.food_id = self.board.fill_square(self.food[0], self.food[1])
 
     def eat_food(self):
-        pass
+        self.board.delete_square(self.food_id)
 
 
 root = tk.Tk()
 app = SnakeApp(master=root)
+app.master.title("Snake on a Plane")
+app.master.maxsize(250, 280)
+app.master.minsize(200, 250)
 app.mainloop()

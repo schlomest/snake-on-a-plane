@@ -38,6 +38,10 @@ class Snake():
         # update UI
         self.board.delete_square(self.body_ui.pop())
         self.body_ui.insert(0, self.board.fill_square(self.body[0][0], self.body[0][1]))
+
+        # check for collision
+        if self.body[0] in self.body[1:]:
+            self.alive = False
     
     def grow(self):
         if self.direction == "RIGHT":
@@ -61,4 +65,7 @@ class Snake():
 
         # update UI
         self.body_ui.insert(0, self.board.fill_square(self.body[0][0], self.body[0][1]))
-    
+
+        # check for collision
+        if self.body[0] in self.body[1:]:
+            self.alive = False
